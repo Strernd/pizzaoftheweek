@@ -1,5 +1,6 @@
 import DoughCalculator from "@/components/dough-calculator";
 import Navigation from "@/components/navigation";
+import Link from "next/link";
 
 export default function DoughCalculatorPage() {
   return (
@@ -22,7 +23,10 @@ export default function DoughCalculatorPage() {
         <footer className="mt-20 text-center text-gray-500 dark:text-gray-400">
           <p>
             © {new Date().getFullYear()} PizzaOfTheWeek.com | New inspiration
-            every week
+            every week |{" "}
+            <Link href="https://strehl.dev/legal-notice" target="_blank">
+              Legal Notice
+            </Link>
           </p>
         </footer>
       </div>

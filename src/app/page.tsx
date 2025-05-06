@@ -1,7 +1,8 @@
-import { Suspense } from "react"
-import RecipeDisplay from "@/components/recipe-display"
-import LoadingRecipes from "@/components/loading-recipes"
-import Navigation from "@/components/navigation"
+import LoadingRecipes from "@/components/loading-recipes";
+import Navigation from "@/components/navigation";
+import RecipeDisplay from "@/components/recipe-display";
+import Link from "next/link";
+import { Suspense } from "react";
 
 export default function Home() {
   return (
@@ -24,12 +25,18 @@ export default function Home() {
         </Suspense>
 
         <footer className="mt-20 text-center text-gray-500 dark:text-gray-400">
-          <p>© {new Date().getFullYear()} PizzaOfTheWeek.com | New inspiration every week</p>
+          <p>
+            © {new Date().getFullYear()} PizzaOfTheWeek.com | New inspiration
+            every week |{" "}
+            <Link href="https://strehl.dev/legal-notice" target="_blank">
+              Legal Notice
+            </Link>
+          </p>
         </footer>
       </div>
     </main>
-  )
+  );
 }
 
 // Set revalidation to occur once per week (in seconds)
-export const revalidate = 604800 // 7 days
+export const revalidate = 604800; // 7 days
