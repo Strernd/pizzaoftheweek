@@ -26,12 +26,19 @@ export async function generateRecipes(
   previousRecipes: Recipe[]
 ): Promise<Recipe[]> {
   // Generate the three types of recipes
-  const classicRecipe = await generateRecipeByType("classic", previousRecipes);
-  const modernRecipe = await generateRecipeByType("modern", previousRecipes);
-  const nonTomatoRecipe = await generateRecipeByType(
+
+  const classicRecipeGen = generateRecipeByType("classic", previousRecipes);
+  const modernRecipeGen = generateRecipeByType("modern", previousRecipes);
+  const nonTomatoRecipeGen = generateRecipeByType(
     "non-tomato",
     previousRecipes
   );
+
+  const [classicRecipe, modernRecipe, nonTomatoRecipe] = await Promise.all([
+    classicRecipeGen,
+    modernRecipeGen,
+    nonTomatoRecipeGen,
+  ]);
 
   console.log("generated recipes");
   console.log(classicRecipe);
