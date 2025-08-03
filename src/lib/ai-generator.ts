@@ -70,7 +70,7 @@ async function generateRecipeByType(
   }
 
   prompt +=
-    "Do not include dough in the ingredients list, only toppings. State the sauce/base explicitly every time. If the ingredients or sauce has to be made first explicitly state the ingredients of that topping in parenthesis, e.g. the ingredients of that specifico pesto. Do not list sub-ingredients that are obvious (e.g. ingredients of Fior di Latte). The recipe should be compatible with Neapolitan style pizza.";
+    "Do not include dough in the ingredients list, only toppings. State the sauce/base explicitly every time. If the ingredients or sauce has to be made first explicitly state the ingredients of that topping in parenthesis, e.g. the ingredients of that specifico pesto. Do not list sub-ingredients that are obvious (e.g. ingredients of Fior di Latte). Be explicit if the topping should be added after baking by adding (after baking) otherwise the reader will assume it is added before baking. The recipe should be compatible with Neapolitan style pizza. Less is more - italian pizza is about simplicity.";
 
   // Add context about previous recipes to avoid duplicates
   if (previousRecipes.length > 0) {
@@ -125,7 +125,7 @@ async function generatePizzaImage(
   try {
     // Create a detailed prompt for the image generation
     let basePrompt =
-      "Photorealistic, high-quality image of a Neapolitan style pizza with exactly and only the ingredients specified within this prompt. Make sure the color of the base is matching the base that is used in the ingredients. ";
+      "Photorealistic, high-quality image of a Neapolitan style pizza with exactly and only the ingredients specified within this prompt. Make sure the ingredients are matching the instruction, (e.g. garlic sliced = add the garlic sliced, not whole garlic cloves). Make sure the color of the base is matching the base that is used in the ingredients. Make sure the size and preparation of the toppings on the pizza is reasonable for being used on a pizza.";
 
     basePrompt += `The ingredients/toppings are: ${ingredients.join(", ")}. `;
 
