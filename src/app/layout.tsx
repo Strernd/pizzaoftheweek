@@ -10,8 +10,29 @@ export const metadata: Metadata = {
   title: "Pizza Of The Week | Weekly Pizza Inspiration",
   description:
     "Discover three new pizza topping ideas every week to inspire your homemade creations.",
+  openGraph: {
+    title: "Pizza Of The Week | Weekly Pizza Inspiration",
+    description:
+      "Discover three new pizza topping ideas every week to inspire your homemade creations.",
+    images: [
+      {
+        url: "/api/og-image", // You'll need to create this API route
+        width: 1200,
+        height: 630,
+        alt: "Pizza Of The Week - Weekly Pizza Inspiration",
+      },
+    ],
+    type: "website",
+    siteName: "Pizza Of The Week",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pizza Of The Week | Weekly Pizza Inspiration",
+    description:
+      "Discover three new pizza topping ideas every week to inspire your homemade creations.",
+    images: ["/api/og-image"],
+  },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
