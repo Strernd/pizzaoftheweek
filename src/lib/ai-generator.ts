@@ -3,6 +3,7 @@ import { put } from "@vercel/blob";
 import {
   experimental_generateImage as generateImage,
   generateObject,
+  generateText,
 } from "ai";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -52,58 +53,41 @@ async function generateRecipeByType(
   type: "classic" | "modern" | "non-tomato",
   previousRecipes: Recipe[]
 ): Promise<Recipe> {
-  let prompt = "";
+  const level1SubPrompts = {
+    classic:
+      "A classic italian/neapolitan pizza, that is simple, traditional and authentic.",
+    modern:
+      "A modern pizza, that is creative, innovative and exciting. It is using ingredients that are not commonly used on traditional pizza - but you will find the perfect balance between the ingredients. It can use tomato sauce as base, but it can also use a different sauce or base.",
+    "non-tomato":
+      "A pizza that is not using tomato sauce as base, but a different sauce or base. The other ingredients can be classic italian/neapolitan or more modern,creative ingredients.",
+  };
 
-  switch (type) {
-    case "classic":
-      prompt =
-        "Generate a classic italian/neapolitan pizza recipe with traditional ingredients. The name should be authentic and professional, not quirky or punny.";
-      break;
-    case "modern":
-      prompt =
-        "Generate a modern pizza recipe with creative ingredients. Think outside the box for ingredients and use ingredients thare are not commonly used on traditional pizza - but make sure the different ingredients harmonize. The name should be sophisticated and appealing, not quirky or punny. Do not use luxury or hard to get ingredients.";
-      break;
-    case "non-tomato":
-      prompt =
-        "Generate a pizza recipe that uses a non-tomato base (like white sauce, pesto, etc.). The othe ingredients can other be classic italian/neapolitan or more modern,creative ingredients. The name should be elegant and descriptive, not quirky or punny.";
-      break;
-  }
+  const previousIngredients = previousRecipes
+    .filter((recipe) => recipe.type === type)
+    .map((recipe) => recipe.ingredients)
+    .map((ingredients, idx) => `Recipe ${idx + 1}: ${ingredients.join(", ")}`)
+    .join("\n");
 
-  prompt +=
-    "Do not include dough in the ingredients list, only toppings. State the sauce/base explicitly every time. If the ingredients or sauce has to be made first explicitly state the ingredients of that topping in parenthesis, e.g. the ingredients of that specifico pesto. Do not list sub-ingredients that are obvious (e.g. ingredients of Fior di Latte). Be explicit if the topping should be added after baking by adding (after baking) otherwise the reader will assume it is added before baking. The recipe should be compatible with Neapolitan style pizza. Less is more - italian pizza is about simplicity.";
+  const level1Prompt = `You are a world-class neapolitan pizza chef. You are famous for your classic and creative pizza inventions. Your restaurant has a weekly changing menu with 3 pizzas. For this weeks menu you need to invent a recipe for: ${level1SubPrompts[type]} Describe your recipe in as much detail as possible. Be specific about the ingredients, how they are prepared, how they are being used, e.g. cut size, preparation, and when to add them to the pizza - before baking or after baking. If a topping or base is made out of multiple ingredients, explicitly state how to make it. Here are ingredients from recipes you've used recently: ${previousIngredients} - Create recipes that are different from the ones you've used recently.`;
 
-  // Add context about previous recipes to avoid duplicates
-  if (previousRecipes.length > 0) {
-    // Filter to only include recipes of the same type
-    const sameTypeRecipes = previousRecipes.filter(
-      (recipe) => recipe.type === type
-    );
+  const level1Result = await generateText({
+    model: openai("gpt-4o"),
+    prompt: level1Prompt,
+  });
+  console.log("Level 1 result", level1Result.text);
 
-    if (sameTypeRecipes.length > 0) {
-      prompt +=
-        "\n\nHere are previous pizza recipes of this type. Try to avoid generating similar names or ingredients:\n";
+  const level2Prompt = `You are a world-class pizza food blogger. You are an expert in breaking down recipes you learnt from the best chefs into concise formats for your readers. You will be given a recipe. Come up with a one-sentence description of the essence of the recipe. Then create a list of all the toppings being used in the recipe in short format. If a topping is made out of multiple ingredients state the sub-ingredients and if needed a preparation adjective (e.g. sauted, chopped, pickled, ...) in parenthesis. Leave out the dough as an ingredient. Make sure to include the ingredients of the base if they are not obvious. Explictly state if a topping should be added after baking by adding (add after baking) otherwise the reader will assume it is added before baking. If no name was specified for the recipe, come up with a name that is descriptive and unique but make it sound classy and professional not quirky or punny. The recipe is: ${level1Result.text}`;
 
-      sameTypeRecipes.forEach((recipe, index) => {
-        prompt += `\n\n${index + 1}. ${recipe.name}\nDescription: ${
-          recipe.description
-        }\nIngredients: ${recipe.ingredients.join(", ")}`;
-      });
-    }
-  }
-
-  // Generate the recipe using AI SDK
   const { object } = await generateObject({
     model: openai("gpt-4o"),
     schema: recipeSchema,
-    prompt,
+    prompt: level2Prompt,
   });
 
+  console.log("Level 2 result", object);
+
   // Generate an image for the recipe
-  const imageUrl = await generatePizzaImage(
-    object.name,
-    object.ingredients,
-    type
-  );
+  const imageUrl = await generatePizzaImage(level1Result.text, type);
 
   // Create the recipe object - note: no instructions field
   return {
@@ -118,27 +102,23 @@ async function generateRecipeByType(
 }
 
 async function generatePizzaImage(
-  pizzaName: string,
-  ingredients: string[],
+  recipeText: string,
   type: string
 ): Promise<string> {
   try {
-    // Create a detailed prompt for the image generation
-    let basePrompt =
-      "Photorealistic, high-quality image of a Neapolitan style pizza with exactly and only the ingredients specified within this prompt. Make sure the ingredients are matching the instruction, (e.g. garlic sliced = add the garlic sliced, not whole garlic cloves). Make sure the color of the base is matching the base that is used in the ingredients. Make sure the size and preparation of the toppings on the pizza is reasonable for being used on a pizza.";
+    const imageDescriptionPrompt = `You are a world-class food photo prompting expert. You can describe any recipe perfectly to create a perfect prompt for an AI image generator. You will be given a pizza recipe, describe the visual composition as detailed as possible. List every ingredient and how it is being used on the pizza. Make sure to include the base if it is not obvious. Your description will be used as a prompt to generate an AI image. The image should be photorealistic, high-quality and professional. A close-up shot focusing on the toppings, showing the characteristic puffy, charred Neapolitan crust. Professional food photography, soft natural lighting, shallow depth of field. No text overlay. Background should be a simple wooden table. Here is the recipe: ${recipeText}`;
 
-    basePrompt += `The ingredients/toppings are: ${ingredients.join(", ")}. `;
+    const imageDescriptionResult = await generateText({
+      model: openai("gpt-4o"),
+      prompt: imageDescriptionPrompt,
+    });
 
-    // Add styling details
-    basePrompt +=
-      "Close-up shot focusing on the toppings, showing the characteristic puffy, charred Neapolitan crust. ";
-    basePrompt +=
-      "Professional food photography, soft natural lighting, shallow depth of field. No text overlay. Background should be a simple wooden table.";
+    console.log("Image description result", imageDescriptionResult.text);
 
     // Generate the image using DALL-E
     const { image } = await generateImage({
       model: openai.image("dall-e-3"),
-      prompt: basePrompt,
+      prompt: imageDescriptionResult.text,
       size: "1024x1024",
     });
     if (!image?.base64) {
@@ -163,6 +143,6 @@ async function generatePizzaImage(
   } catch (error) {
     console.error("Error generating pizza image:", error);
     // Fallback to placeholder if image generation fails
-    return `/placeholder.svg?height=600&width=800&query=delicious ${type} pizza called ${pizzaName}`;
+    return `/placeholder.svg`;
   }
 }
