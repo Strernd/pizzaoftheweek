@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/api/og-image", // You'll need to create this API route
-        width: 1200,
-        height: 630,
+        width: 1024,
+        height: 1024,
         alt: "Pizza Of The Week - Weekly Pizza Inspiration",
       },
     ],
