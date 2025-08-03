@@ -57,20 +57,20 @@ async function generateRecipeByType(
   switch (type) {
     case "classic":
       prompt =
-        "Generate a classic pizza recipe with traditional ingredients. The name should be authentic and professional, not quirky or punny.";
+        "Generate a classic italian/neapolitan pizza recipe with traditional ingredients. The name should be authentic and professional, not quirky or punny.";
       break;
     case "modern":
       prompt =
-        "Generate a modern pizza recipe with creative ingredients. The name should be sophisticated and appealing, not quirky or punny. Do not use luxury or hard to get ingredients.";
+        "Generate a modern pizza recipe with creative ingredients. Think outside the box for ingredients and use ingredients thare are not commonly used on traditional pizza - but make sure the different ingredients harmonize. The name should be sophisticated and appealing, not quirky or punny. Do not use luxury or hard to get ingredients.";
       break;
     case "non-tomato":
       prompt =
-        "Generate a pizza recipe that uses a non-tomato base (like white sauce, pesto, etc.). The name should be elegant and descriptive, not quirky or punny.";
+        "Generate a pizza recipe that uses a non-tomato base (like white sauce, pesto, etc.). The othe ingredients can other be classic italian/neapolitan or more modern,creative ingredients. The name should be elegant and descriptive, not quirky or punny.";
       break;
   }
 
   prompt +=
-    "Do not include dough in the ingredients list, only toppings. State the sauce/base explicitly every time. If an ingredient itself is consisting of multiple ingredients which it can be made of, specify in parenthesis. E.g Pesto (Basil, Olive Oil, Garlic, Parmesan). The recipe should be compatible with Neapolitan style pizza.";
+    "Do not include dough in the ingredients list, only toppings. State the sauce/base explicitly every time. If the ingredients or sauce has to be made first explicitly state the ingredients of that topping in parenthesis, e.g. the ingredients of that specifico pesto. Do not list sub-ingredients that are obvious (e.g. ingredients of Fior di Latte). The recipe should be compatible with Neapolitan style pizza.";
 
   // Add context about previous recipes to avoid duplicates
   if (previousRecipes.length > 0) {
@@ -125,22 +125,9 @@ async function generatePizzaImage(
   try {
     // Create a detailed prompt for the image generation
     let basePrompt =
-      "Photorealistic, high-quality image of a Neapolitan style pizza with ";
+      "Photorealistic, high-quality image of a Neapolitan style pizza with exactly and only the ingredients specified within this prompt. Make sure the color of the base is matching the base that is used in the ingredients. ";
 
-    // Add type-specific details
-    if (type === "classic") {
-      basePrompt += "traditional toppings. ";
-    } else if (type === "modern") {
-      basePrompt += "creative, gourmet toppings. ";
-    } else if (type === "non-tomato") {
-      basePrompt += `a ${ingredients[0].toLowerCase()} base instead of tomato sauce. `;
-    }
-
-    // Add specific ingredients
-    const toppings = ingredients
-      .slice(type === "non-tomato" ? 1 : 0)
-      .join(", ");
-    basePrompt += `Toppings include ${toppings}. `;
+    basePrompt += `The ingredients/toppings are: ${ingredients.join(", ")}. `;
 
     // Add styling details
     basePrompt +=
