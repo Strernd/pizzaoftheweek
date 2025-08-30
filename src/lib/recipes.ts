@@ -27,6 +27,10 @@ export async function getRecipes(): Promise<Recipe[]> {
     const previousRecipes = storedData?.recipes || [];
 
     // Generate new recipes (passing the last CONTEXT_LIMIT recipes for context)
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Should generate here - but skipping on dev");
+      return previousRecipes.slice(0, 3);
+    }
     const newRecipes = await generateRecipes(
       previousRecipes.slice(0, CONTEXT_LIMIT)
     );

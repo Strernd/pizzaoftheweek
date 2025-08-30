@@ -120,7 +120,7 @@ export default function DoughCalculator() {
           // Check for specific error messages and provide more user-friendly guidance
           if (error.message === "Temperature too low or duration too short") {
             setYeastError(
-              "The fermentation conditions require too much yeast. Try increasing the temperature or extending the fermentation time."
+              "The fermentation conditions require too much yeast to calculate accurately. Try increasing the temperature or extending the fermentation time."
             );
           } else if (error.message.includes("Cold fermentation time too low")) {
             setYeastError(
@@ -348,7 +348,7 @@ export default function DoughCalculator() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-2 gap-6 mb-4">
         <NumberInput
           label="Number of Dough Balls"
           value={doughBalls}
@@ -368,7 +368,7 @@ export default function DoughCalculator() {
         />
       </div>
 
-      <div className="mb-8">
+      <div className="mb-4 grid grid-cols-2 gap-6">
         <PercentageInput
           label="Water"
           value={waterPercentage}
@@ -392,22 +392,24 @@ export default function DoughCalculator() {
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
             Room Temperature Proof
           </h3>
-          <NumberInput
-            label="Hours"
-            value={roomProofHours}
-            onChange={setRoomProofHours}
-            min={1}
-            max={24}
-          />
+          <div className="grid grid-cols-2 gap-6">
+            <NumberInput
+              label="Hours"
+              value={roomProofHours}
+              onChange={setRoomProofHours}
+              min={1}
+              max={24}
+            />
 
-          <NumberInput
-            label="Temperature"
-            value={roomTempC}
-            onChange={setRoomTempC}
-            min={Math.max(1, minTempC)}
-            max={Math.min(34, maxTempC)}
-            unit="°C"
-          />
+            <NumberInput
+              label="Temperature"
+              value={roomTempC}
+              onChange={setRoomTempC}
+              min={Math.max(1, minTempC)}
+              max={Math.min(34, maxTempC)}
+              unit="°C"
+            />
+          </div>
         </div>
 
         <div>
@@ -430,24 +432,26 @@ export default function DoughCalculator() {
             </div>
           </div>
 
-          <NumberInput
-            label="Hours"
-            value={coldProofHours}
-            onChange={setColdProofHours}
-            min={0}
-            max={48}
-            disabled={!coldProofEnabled}
-          />
+          <div className="grid grid-cols-2 gap-6">
+            <NumberInput
+              label="Hours"
+              value={coldProofHours}
+              onChange={setColdProofHours}
+              min={0}
+              max={48}
+              disabled={!coldProofEnabled}
+            />
 
-          <NumberInput
-            label="Temperature"
-            value={coldTempC}
-            onChange={setColdTempC}
-            min={Math.max(1, minTempC)}
-            max={Math.min(20, maxTempC)}
-            unit="°C"
-            disabled={!coldProofEnabled}
-          />
+            <NumberInput
+              label="Temperature"
+              value={coldTempC}
+              onChange={setColdTempC}
+              min={Math.max(1, minTempC)}
+              max={Math.min(20, maxTempC)}
+              unit="°C"
+              disabled={!coldProofEnabled}
+            />
+          </div>
         </div>
       </div>
 
